@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Bingo do Isaque</title>
+  <link rel="icon" href="figures/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Playwrite+NZ+Guides&display=swap" rel="stylesheet">
+
+  <style>
+    h1 {
+      font-family: 'Playwrite NZ Guides', sans-serif;
+      font-weight: 600;
+      font-size: 45px;
+    }
+
+    button {
+      font-family: 'Noto Sans', sans-serif;
+      font-weight: 600;
+      background: #dd944f;
+    }
+
+    body {
+      font-family: sans-serif;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .main-img {
+      width: 400px;
+      height: 400px;
+      margin: 30px auto;
+      border: 4px solid #444;
+      border-radius: 15px;
+      background: #eee;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .sorteados {
+      margin-top: 32px;
+    }
+
+    .icone-sort {
+      display: inline-block;
+      width: 60px;
+      height: 60px;
+      margin: 6px;
+      border: 2px solid #bbb;
+      background: #fafafa;
+      border-radius: 10px;
+      vertical-align: middle;
+    }
+
+    .icone-sort img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    #sortear,
+    #reset {
+      margin: 12px 6px;
+      padding: 12px 32px;
+      border-radius: 8px;
+      border: none;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    #sortear:disabled {
+      background: #ccc;
+      color: #888;
+      cursor: default;
+    }
+
+    .completed {
+      color: green;
+      font-weight: bold;
+      font-size: 22px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Bingo do Isaque</h1>
+  <div class="main-img" id="mainImgContainer">
+    <img id="mainImg" src="figures/banners/bingo.png" alt="Ícone sorteado" />
+  </div>
+  <div>
+    <button id="sortear">Sortear</button>
+    <button id="reset">Resetar</button>
+  </div>
+  <div id="mensagemFim" class="completed" style="display:none;">
+    Todos os itens sorteados!
+  </div>
+  <div class="sorteados" id="sorteadosContainer">
+    <!-- Ícones sorteados aparecerão aqui -->
+  </div>
+
+  <script>
+    const icons = [
+      'alfinete.png', 'babador.png', 'baba-eletronica.png', 'balanco.png', 'banheira.png',
+      'bebe-conforto.png', 'berco.png', 'body.png', 'bola.png', 'carrinho-brinquedo.png',
+      'carrinho.png', 'chochalho.png', 'conjuntinho.png', 'cotonete.png', 'dado.png',
+      'dino-brinquedo.png', 'fralda.png', 'isaque.png', 'lenco-umedecido.png', 'luvas.png',
+      'mamadeira.png', 'meia.png', 'mijao.png', 'mingau.png', 'mochila.png', 'patinho.png',
+      'pente.png', 'pijama.png', 'pipo.png', 'pomada.png', 'remedio.png', 'sabonete.png',
+      'sling.png', 'termometro.png', 'toalha.png', 'touca.png', 'travesseiro.png',
+      'trocador.png', 'ultrassom.png', 'ursinho.png'
+    ];
+
+    let restantes = [];
+    let sorteados = [];
+
+    function renderSorteados() {
+      const cont = document.getElementById('sorteadosContainer');
+      cont.innerHTML = '';
+      sorteados.forEach(nome => {
+        const div = document.createElement('span');
+        div.className = 'icone-sort';
+        const img = document.createElement('img');
+        img.src = `figures/banners/${nome}`;
+        img.alt = nome.replace('.png', '');
+        div.appendChild(img);
+        cont.appendChild(div);
+      });
+    }
+
+    function resetRodada() {
+      restantes = [...icons];
+      sorteados = [];
+      renderSorteados();
+      document.getElementById('sortear').disabled = false;
+      document.getElementById('mensagemFim').style.display = 'none';
+      document.getElementById('mainImg').src = `figures/banners/bingo.png`;
+    }
+
+    function sorteioAnimado() {
+      if (restantes.length === 0) return;
+
+      document.getElementById('sortear').disabled = true;
+
+      // Sorteia o próximo ícone (apenas entre os restantes)
+      const idxSorteado = Math.floor(Math.random() * restantes.length);
+      const nomeSorteado = restantes[idxSorteado];
+
+      let frame = 0;
+      let t = 50; // tempo inicial para cada frame (ms)
+      const tempoMax = 2000;    // tempo total de animação (ms)
+      const numFrames = 32;
+      let lastIdx = -1;
+
+      // Gera uma sequência que desacelera gradualmente.
+      let steps = [];
+      let acc = 0, fator = 1.05, inicial = 45;
+      for (let k = 0; k < numFrames; ++k) {
+        acc += inicial * Math.pow(fator, k);
+        steps.push(acc);
+      }
+      // normaliza 
+      let total = steps[steps.length - 1];
+      let timePoints = steps.map(v => (v / total) * tempoMax);
+
+      let currentTimer = null;
+      function animar() {
+        if (frame < numFrames) {
+          // Seleciona um ícone aleatório entre os restantes (pode repetir)
+          let idx = Math.floor(Math.random() * restantes.length);
+          // Garante que não repita exatamente o mesmo frame, se possível
+          if (restantes.length > 1) while (idx === lastIdx) idx = Math.floor(Math.random() * restantes.length);
+          lastIdx = idx;
+
+          document.getElementById('mainImg').src = `figures/banners/${restantes[idx]}`;
+          frame++;
+          let delay = (frame < numFrames) ? (timePoints[frame] - timePoints[frame - 1] || 30) : 0;
+          currentTimer = setTimeout(animar, delay);
+        } else {
+          // Mostra o sorteado definitivo
+          document.getElementById('mainImg').src = `figures/banners/${nomeSorteado}`;
+          sorteados.push(nomeSorteado);
+          restantes.splice(idxSorteado, 1);
+          renderSorteados();
+          if (restantes.length === 0) {
+            document.getElementById('sortear').disabled = true;
+            document.getElementById('mensagemFim').style.display = '';
+          } else {
+            document.getElementById('sortear').disabled = false;
+          }
+        }
+      }
+      animar();
+    }
+
+    document.getElementById('sortear').onclick = sorteioAnimado;
+    document.getElementById('reset').onclick = resetRodada;
+
+    // Inicialização
+    resetRodada();
+  </script>
+</body>
+
+</html>
