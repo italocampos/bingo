@@ -1,49 +1,11 @@
-import random
-from typing import List
 import html
+import os
+import random
 
-icons = [
-    'alfinete.png',
-    'babador.png',
-    'baba-eletronica.png',
-    'balanco.png',
-    'banheira.png',
-    'bebe-conforto.png',
-    'berco.png',
-    'body.png',
-    'bola.png',
-    'carrinho-brinquedo.png',
-    'carrinho.png',
-    'chochalho.png',
-    'conjuntinho.png',
-    'cotonete.png',
-    'dado.png',
-    'dino-brinquedo.png',
-    'fralda.png',
-    'isaque.png',
-    'lenco-umedecido.png',
-    'luvas.png',
-    'mamadeira.png',
-    'meia.png',
-    'mijao.png',
-    'mingau.png',
-    'mochila.png',
-    'patinho.png',
-    'pente.png',
-    'pijama.png',
-    'pipo.png',
-    'pomada.png',
-    'remedio.png',
-    'sabonete.png',
-    'sling.png',
-    'termometro.png',
-    'toalha.png',
-    'touca.png',
-    'travesseiro.png',
-    'trocador.png',
-    'ultrassom.png',
-    'ursinho.png',
-]
+from typing import List
+
+
+icons = [f for f in os.listdir('html/figures/icons') if f.endswith('.png')]
 
 # 4 grupos de 10 ícones
 num_groups = 4
